@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jurnal Trading Pro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0d1117; /* Warna dasar yang lebih gelap */
+            color: #d1d5db;
+            overflow-x: hidden;
+        }
+        .glass-card {
+            background: rgba(31, 41, 55, 0.5);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: border-color 0.3s ease, background-color 0.3s ease;
+        }
+        .glass-card:hover {
+            background: rgba(31, 41, 55, 0.6);
+            border-color: rgba(59, 130, 246, 0.4);
+        }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #1f2937; }
+        ::-webkit-scrollbar-thumb { background: #4b5563; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #6b7280; }
+        .btn-glow { box-shadow: 0 0 5px #2563eb, 0 0 10px #2563eb, 0 0 15px #2563eb; }
+        
+        /* Animasi */
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .fade-in-up {
+            animation: fadeInUp 0.5s ease-out forwards;
+        }
+
+        /* Navigasi Aktif */
+        .nav-active {
+            background-color: #3b82f6;
+            color: white;
+        }
+
+        /* Modal Styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(17, 24, 39, 0.8);
+            backdrop-filter: blur(5px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 50;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease-out;
+        }
+        .modal-overlay.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+        .modal-content {
+            background: #1f2937;
+            padding: 2rem;
+            border-radius: 1rem;
+            width: 90%;
+            max-width: 600px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transform: scale(0.95);
+            transition: all 0.3s ease-out;
+        }
+         .modal-overlay.visible .modal-content {
+            transform: scale(1);
+        }
+
+        /* Efek Aurora Background */
+        .aurora-background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            overflow: hidden;
+        }
+        .aurora-blob {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(120px);
+            opacity: 0.25;
+            animation: move 30s infinite alternate;
+        }
+        .blob1 {
+            width: 500px; height: 500px;
+            background: #3b82f6; /* Blue */
+            top: -20%; left: -10%;
+        }
+        .blob2 {
+            width: 600px; height: 600px;
+            background: #8b5cf6; /* Purple */
+            bottom: -30%; right: -20%;
+            animation-duration: 40s;
+            animation-delay: -10s;
+        }
+        .blob3 {
+            width: 400px; height: 400px;
+            background: #14b8a6; /* Teal */
+            bottom: 10%; left: 20%;
+            animation-duration: 25s;
+        }
+
+        @keyframes move {
+            from { transform: translate(0, 0) rotate(0deg) scale(1); }
+            to { transform: translate(150px, 50px) rotate(180deg) scale(1.2); }
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <div class="aurora-background">
+        <div class="aurora-blob blob1"></div>
+        <div class="aurora-blob blob2"></div>
+        <div class="aurora-blob blob3"></div>
+    </div>
+
+    <div class="min-h-screen flex flex-col relative z-10">
+        <!-- Header -->
+        <header class="bg-gray-900/50 backdrop-blur-sm border-b border-gray-700/50 sticky top-0 z-10">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex items-center justify-between h-16">
+                    <div class="flex items-center space-x-3">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-blue-500" viewBox="0 0 20 20" fill="currentColor">
+                            <path d="M2 10a8 8 0 018-8v8h8a8 8 0 11-16 0z" />
+                            <path d="M12 2.252A8.014 8.014 0 0117.748 8H12V2.252z" />
+                        </svg>
+                        <h1 class="text-xl font-bold text-white">Jurnal Trading Pro</h1>
+                    </div>
+                    <nav class="space-x-2">
+                         <button id="nav-dashboard" onclick="switchView('dashboard')" class="px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200">Dashboard</button>
+                         <button id="nav-log" onclick="switchView('log')" class="px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200">Log Trade</button>
+                    </nav>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="flex-grow container mx-auto p-4 sm:p-6 lg:p-8">
+
+            <!-- Dashboard View -->
+            <div id="dashboard-view">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                    <!-- Stat Card -->
+                    <div class="stat-card glass-card rounded-xl p-6 flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-medium text-gray-400">Total Profit/Loss</p>
+                            <p id="total-pnl" class="text-2xl font-bold mt-1">$0.00</p>
+                        </div>
+                        <div id="pnl-icon" class="w-12 h-12 rounded-full flex items-center justify-center bg-gray-600">
+                           <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                        </div>
+                    </div>
+                     <!-- Stat Card -->
+                    <div class="stat-card glass-card rounded-xl p-6 flex items-center justify-between" style="animation-delay: 100ms;">
+                        <div>
+                            <p class="text-sm font-medium text-gray-400">Win Rate</p>
+                            <p id="win-rate" class="text-2xl font-bold mt-1">0%</p>
+                        </div>
+                         <div class="w-12 h-12 rounded-full flex items-center justify-center bg-blue-900/50">
+                           <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 9l3 3m0 0l-3 3m3-3H3" /></svg>
+                        </div>
+                    </div>
+                     <!-- Stat Card -->
+                    <div class="stat-card glass-card rounded-xl p-6 flex items-center justify-between" style="animation-delay: 200ms;">
+                        <div>
+                            <p class="text-sm font-medium text-gray-400">Total Trades</p>
+                            <p id="total-trades" class="text-2xl font-bold mt-1">0</p>
+                        </div>
+                         <div class="w-12 h-12 rounded-full flex items-center justify-center bg-purple-900/50">
+                           <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                        </div>
+                    </div>
+                     <!-- Stat Card -->
+                    <div class="stat-card glass-card rounded-xl p-6 flex items-center justify-between" style="animation-delay: 300ms;">
+                        <div>
+                            <p class="text-sm font-medium text-gray-400">Profit Factor</p>
+                            <p id="profit-factor" class="text-2xl font-bold mt-1">0.00</p>
+                        </div>
+                        <div class="w-12 h-12 rounded-full flex items-center justify-center bg-yellow-900/50">
+                          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-yellow-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v.01" /></svg>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div class="lg:col-span-2 glass-card rounded-xl p-6">
+                        <h2 class="text-lg font-semibold text-white mb-4">Kurva Ekuitas</h2>
+                        <canvas id="equityCurveChart"></canvas>
+                    </div>
+                    <div class="glass-card rounded-xl p-6">
+                        <h2 class="text-lg font-semibold text-white mb-4">Performa Strategi</h2>
+                        <canvas id="strategyPerformanceChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Trade Log View -->
+            <div id="log-view" class="hidden">
+                 <!-- Form to add new trade -->
+                 <div class="glass-card rounded-xl p-8 mb-8">
+                    <h2 class="text-2xl font-bold text-white mb-6">Tambah Trade Baru</h2>
+                    <form id="trade-form" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                        <input type="hidden" id="trade-id">
+                        <div>
+                            <label for="date" class="block text-sm font-medium text-gray-300">Tanggal</label>
+                            <input type="date" id="date" required class="mt-1 block w-full bg-gray-700 border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 text-white">
+                        </div>
+                        <div>
+                            <label for="session" class="block text-sm font-medium text-gray-300">Sesi Trading</label>
+                            <select id="session" required class="mt-1 block w-full bg-gray-700 border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 text-white">
+                                <option>Sesi Asia</option>
+                                <option>Sesi London</option>
+                                <option>Sesi New York</option>
+                                <option>Overlap LDN/NY</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="asset" class="block text-sm font-medium text-gray-300">Aset (Contoh: BTC/USD)</label>
+                            <input type="text" id="asset" required class="mt-1 block w-full bg-gray-700 border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 text-white">
+                        </div>
+                        <div>
+                            <label for="strategy" class="block text-sm font-medium text-gray-300">Strategi</label>
+                            <input type="text" id="strategy" required class="mt-1 block w-full bg-gray-700 border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 text-white">
+                        </div>
+                        <div>
+                            <label for="position" class="block text-sm font-medium text-gray-300">Posisi</label>
+                            <select id="position" class="mt-1 block w-full bg-gray-700 border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 text-white">
+                                <option>Long</option>
+                                <option>Short</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="entry-price" class="block text-sm font-medium text-gray-300">Harga Entry</label>
+                            <input type="number" step="any" id="entry-price" required class="mt-1 block w-full bg-gray-700 border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 text-white">
+                        </div>
+                        <div>
+                            <label for="exit-price" class="block text-sm font-medium text-gray-300">Harga Exit</label>
+                            <input type="number" step="any" id="exit-price" required class="mt-1 block w-full bg-gray-700 border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 text-white">
+                        </div>
+                         <div>
+                            <label for="quantity" class="block text-sm font-medium text-gray-300">Kuantitas (Lot/Size)</label>
+                            <input type="number" step="any" id="quantity" required class="mt-1 block w-full bg-gray-700 border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 text-white">
+                        </div>
+                         <div>
+                            <label for="pnl" class="block text-sm font-medium text-gray-300">P/L ($)</label>
+                            <input type="number" step="any" id="pnl" required class="mt-1 block w-full bg-gray-700 border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 text-white">
+                        </div>
+                        <div class="md:col-span-2 lg:col-span-4">
+                            <label for="notes" class="block text-sm font-medium text-gray-300">Catatan & Analisis</label>
+                            <textarea id="notes" rows="3" class="mt-1 block w-full bg-gray-700 border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 text-white"></textarea>
+                        </div>
+                        <div class="md:col-span-2 lg:col-span-4 flex items-center justify-end space-x-4">
+                            <button type="button" onclick="clearForm()" class="px-6 py-2 border border-gray-600 rounded-md shadow-sm text-sm font-medium text-gray-300 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">Batal</button>
+                            <button type="submit" class="px-8 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 btn-glow">Simpan Trade</button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Trades Table -->
+                <div class="glass-card rounded-xl overflow-hidden">
+                    <div class="p-6">
+                         <h2 class="text-2xl font-bold text-white">Riwayat Trade</h2>
+                         <p class="text-gray-400 mt-1">Daftar semua trade yang telah Anda catat.</p>
+                    </div>
+                    <div>
+                        <table class="min-w-full divide-y divide-gray-700">
+                            <thead class="hidden md:table-header-group bg-gray-800/50">
+                                <tr>
+                                    <th class="w-1 p-0"></th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Aset / Strategi</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Posisi</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">P/L ($)</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Sesi</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Tanggal</th>
+                                    <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-300 uppercase tracking-wider">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="trade-log">
+                                <!-- Data akan diisi oleh JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Trade Detail Modal -->
+    <div id="trade-detail-modal" class="modal-overlay">
+        <div class="modal-content" id="modal-content-area">
+            <!-- Modal content will be injected here -->
+        </div>
+    </div>
+
+
+<script>
+    // Global variables
+    let trades = [];
+    let equityCurveChart;
+    let strategyPerformanceChart;
+    let form;
+
+    // DOM Elements
+    const views = {
+        dashboard: document.getElementById('dashboard-view'),
+        log: document.getElementById('log-view'),
+    };
+    const navButtons = {
+        dashboard: document.getElementById('nav-dashboard'),
+        log: document.getElementById('nav-log')
+    };
+    const dashboardElements = {
+        totalPnl: document.getElementById('total-pnl'),
+        pnlIcon: document.getElementById('pnl-icon'),
+        winRate: document.getElementById('win-rate'),
+        totalTrades: document.getElementById('total-trades'),
+        profitFactor: document.getElementById('profit-factor'),
+    };
+    const tradeLogTable = document.getElementById('trade-log');
+    const modal = document.getElementById('trade-detail-modal');
+    const modalContent = document.getElementById('modal-content-area');
+
+    // -- APPLICATION LOGIC --
+
+    function switchView(viewName) {
+        Object.values(views).forEach(v => v.classList.add('hidden'));
+        if (views[viewName]) {
+            views[viewName].classList.remove('hidden');
+        }
+        
+        Object.values(navButtons).forEach(b => b.classList.remove('nav-active'));
+        if(navButtons[viewName]) {
+            navButtons[viewName].classList.add('nav-active');
+        }
+
+        if(viewName === 'dashboard') {
+            updateDashboard();
+        }
+    }
+
+    function saveTrades() {
+        localStorage.setItem('trades', JSON.stringify(trades));
+    }
+
+    function loadTrades() {
+        const storedTrades = localStorage.getItem('trades');
+        if (storedTrades) {
+            trades = JSON.parse(storedTrades);
+        }
+    }
+    
+    function clearForm() {
+        form.reset();
+        document.getElementById('trade-id').value = '';
+        document.getElementById('date').valueAsDate = new Date();
+    }
+    
+    function calculatePnl() {
+        const entry = parseFloat(document.getElementById('entry-price').value);
+        const exit = parseFloat(document.getElementById('exit-price').value);
+        const quantity = parseFloat(document.getElementById('quantity').value);
+        const position = document.getElementById('position').value;
+        const pnlInput = document.getElementById('pnl');
+
+        if (isNaN(entry) || isNaN(exit) || isNaN(quantity)) {
+            pnlInput.value = '';
+            return;
+        }
+
+        let pnl = 0;
+        if (position === 'Long') {
+            pnl = (exit - entry) * quantity;
+        } else {
+            pnl = (entry - exit) * quantity;
+        }
+        pnlInput.value = pnl.toFixed(2);
+    }
+
+    function handleFormSubmit(e) {
+        e.preventDefault();
+        
+        const tradeId = document.getElementById('trade-id').value;
+        const pnl = parseFloat(document.getElementById('pnl').value);
+        let status = 'Breakeven';
+        if (pnl > 0) status = 'Win';
+        if (pnl < 0) status = 'Loss';
+
+        const existingTrade = tradeId ? trades.find(t => t.id === tradeId) : null;
+
+        const tradeData = {
+            id: tradeId ? tradeId : Date.now().toString(),
+            timestamp: existingTrade ? existingTrade.timestamp : Date.now(),
+            date: document.getElementById('date').value,
+            session: document.getElementById('session').value,
+            asset: document.getElementById('asset').value.toUpperCase(),
+            strategy: document.getElementById('strategy').value,
+            position: document.getElementById('position').value,
+            entryPrice: parseFloat(document.getElementById('entry-price').value),
+            exitPrice: parseFloat(document.getElementById('exit-price').value),
+            quantity: parseFloat(document.getElementById('quantity').value),
+            pnl: pnl,
+            status: status,
+            notes: document.getElementById('notes').value
+        };
+
+        if (tradeId) {
+            const index = trades.findIndex(t => t.id === tradeId);
+            trades[index] = tradeData;
+        } else {
+            trades.push(tradeData);
+        }
+
+        trades.sort((a, b) => a.timestamp - b.timestamp);
+        
+        saveTrades();
+        renderTradeLog();
+        clearForm();
+        updateDashboard();
+    }
+
+    function editTrade(id) {
+        const trade = trades.find(t => t.id === id);
+        if (trade) {
+            document.getElementById('trade-id').value = trade.id;
+            document.getElementById('date').value = trade.date;
+            document.getElementById('session').value = trade.session;
+            document.getElementById('asset').value = trade.asset;
+            document.getElementById('strategy').value = trade.strategy;
+            document.getElementById('position').value = trade.position;
+            document.getElementById('entry-price').value = trade.entryPrice;
+            document.getElementById('exit-price').value = trade.exitPrice;
+            document.getElementById('quantity').value = trade.quantity;
+            document.getElementById('pnl').value = trade.pnl;
+            document.getElementById('notes').value = trade.notes;
+            switchView('log');
+            window.scrollTo(0, 0);
+        }
+    }
+
+    function deleteTrade(id) {
+        // Use a custom modal for confirmation instead of confirm()
+        const tradeToDelete = trades.find(t => t.id === id);
+        if (!tradeToDelete) return;
+
+        modalContent.innerHTML = `
+            <h2 class="text-xl font-bold text-white mb-4">Konfirmasi Hapus</h2>
+            <p class="text-gray-300 mb-6">Apakah Anda yakin ingin menghapus trade untuk aset <strong>${tradeToDelete.asset}</strong>?</p>
+            <div class="flex justify-end space-x-4">
+                <button onclick="closeModal()" class="px-4 py-2 border border-gray-600 rounded-md text-sm font-medium text-gray-300 hover:bg-gray-700">Batal</button>
+                <button onclick="confirmDelete('${id}')" class="px-4 py-2 bg-red-600 text-white rounded-md text-sm font-medium hover:bg-red-700">Ya, Hapus</button>
+            </div>
+        `;
+        modal.classList.add('visible');
+    }
+    
+    function confirmDelete(id) {
+        trades = trades.filter(t => t.id !== id);
+        saveTrades();
+        renderTradeLog();
+        updateDashboard();
+        closeModal();
+    }
+
+    function openModal(id) {
+        const trade = trades.find(t => t.id === id);
+        if (!trade) return;
+
+        const pnlClass = trade.status === 'Win' ? 'text-green-400' : trade.status === 'Loss' ? 'text-red-400' : 'text-gray-400';
+        const statusClass = trade.status === 'Win' ? 'bg-green-900/50 text-green-300' : trade.status === 'Loss' ? 'bg-red-900/50 text-red-300' : 'bg-gray-700/50 text-gray-300';
+        
+        modalContent.innerHTML = `
+            <div class="flex justify-between items-start">
+                 <h2 class="text-2xl font-bold text-white mb-2">${trade.asset} <span class="text-base font-medium text-gray-400 ml-2">${trade.strategy}</span></h2>
+                 <button onclick="closeModal()" class="text-gray-400 hover:text-white text-2xl leading-none">&times;</button>
+            </div>
+            <p class="text-sm text-gray-500 mb-6">${new Date(trade.date).toLocaleDateString('id-ID', { timeZone: 'UTC', year: 'numeric', month: 'long', day: 'numeric' })}</p>
+            
+            <div class="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6">
+                <div>
+                    <p class="text-xs text-gray-400 uppercase">Posisi</p>
+                    <p class="font-semibold">${trade.position}</p>
+                </div>
+                <div>
+                    <p class="text-xs text-gray-400 uppercase">Sesi</p>
+                    <p class="font-semibold">${trade.session}</p>
+                </div>
+                <div>
+                    <p class="text-xs text-gray-400 uppercase">Status</p>
+                    <p><span class="px-3 py-1 text-xs leading-5 font-semibold rounded-full ${statusClass}">${trade.status}</span></p>
+                </div>
+                 <div>
+                    <p class="text-xs text-gray-400 uppercase">P/L ($)</p>
+                    <p class="font-bold text-lg ${pnlClass}">$${trade.pnl.toFixed(2)}</p>
+                </div>
+                 <div>
+                    <p class="text-xs text-gray-400 uppercase">Entry</p>
+                    <p class="font-semibold">${trade.entryPrice}</p>
+                </div>
+                 <div>
+                    <p class="text-xs text-gray-400 uppercase">Exit</p>
+                    <p class="font-semibold">${trade.exitPrice}</p>
+                </div>
+                 <div>
+                    <p class="text-xs text-gray-400 uppercase">Kuantitas</p>
+                    <p class="font-semibold">${trade.quantity}</p>
+                </div>
+            </div>
+
+            <div>
+                <p class="text-sm text-gray-400 uppercase font-semibold mb-2">Catatan & Analisis</p>
+                <div class="bg-gray-800/50 p-4 rounded-lg text-gray-300 whitespace-pre-wrap max-h-40 overflow-y-auto">${trade.notes || 'Tidak ada catatan.'}</div>
+            </div>
+        `;
+        modal.classList.add('visible');
+    }
+
+    function closeModal() {
+        modal.classList.remove('visible');
+    }
+
+    function generateAvatar(asset) {
+        const letter = asset.charAt(0).toUpperCase();
+        const colors = ['bg-pink-600', 'bg-purple-600', 'bg-indigo-600', 'bg-blue-600', 'bg-teal-500', 'bg-green-500', 'bg-yellow-500', 'bg-orange-500', 'bg-red-600'];
+        let hash = 0;
+        if (asset.length === 0) return hash;
+        for (let i = 0; i < asset.length; i++) {
+            const char = asset.charCodeAt(i);
+            hash = ((hash << 5) - hash) + char;
+            hash = hash & hash; // Convert to 32bit integer
+        }
+        const color = colors[Math.abs(hash % colors.length)];
+        return `<div class="w-10 h-10 rounded-full ${color} flex-shrink-0 flex items-center justify-center mr-4"><span class="text-sm font-bold text-white tracking-wider">${letter}</span></div>`;
+    }
+
+
+    // -- RENDERING & UPDATES --
+
+    function renderTradeLog() {
+        tradeLogTable.innerHTML = '';
+        if (trades.length === 0) {
+            tradeLogTable.innerHTML = `<tr><td colspan="8" class="text-center py-20 text-gray-500">
+                <svg class="mx-auto h-12 w-12 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                    <path vector-effect="non-scaling-stroke" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                </svg>
+                <h3 class="mt-4 text-sm font-medium text-white">Jurnal Masih Kosong</h3>
+                <p class="mt-1 text-sm text-gray-400">Catat trade pertama Anda untuk memulai analisis.</p>
+            </td></tr>`;
+            return;
+        }
+
+        trades.slice().reverse().forEach(trade => {
+            const pnlClass = trade.status === 'Win' ? 'text-green-400' : trade.status === 'Loss' ? 'text-red-400' : 'text-gray-400';
+            const indicatorColor = trade.status === 'Win' ? 'border-green-500' : trade.status === 'Loss' ? 'border-red-500' : 'border-gray-500';
+            const indicatorBg = trade.status === 'Win' ? 'bg-green-500' : trade.status === 'Loss' ? 'bg-red-500' : 'bg-gray-500';
+            const avatar = generateAvatar(trade.asset);
+
+            const row = `
+                <tr class="block md:table-row md:border-b md:border-gray-800 hover:bg-gray-800/50 transition duration-200 border-l-4 md:border-l-0 ${indicatorColor}">
+                    <td class="hidden md:table-cell p-0 w-1"><div class="${indicatorBg} h-full w-full"></div></td>
+                    <td data-label="Aset" class="p-4 md:px-6 md:py-4 whitespace-nowrap text-sm font-semibold text-white flex items-center">
+                        ${avatar}
+                        <div>
+                            <span class="font-bold text-base">${trade.asset}</span>
+                            <span class="block text-xs text-gray-400 font-normal">${trade.strategy}</span>
+                        </div>
+                    </td>
+                    <td data-label="Posisi" class="px-4 pb-2 md:p-0 md:px-6 md:py-4 whitespace-nowrap text-sm text-gray-300 flex items-center justify-between md:table-cell"><span class="font-bold text-gray-400 md:hidden mr-2">Posisi</span><span>${trade.position}</span></td>
+                    <td data-label="P/L ($)" class="px-4 pb-2 md:p-0 md:px-6 md:py-4 whitespace-nowrap text-lg font-bold ${pnlClass} flex items-center justify-between md:table-cell md:text-sm"><span class="font-bold text-gray-400 text-sm md:hidden mr-2">P/L ($)</span><span>${trade.pnl > 0 ? '+' : ''}${trade.pnl.toFixed(2)}</span></td>
+                    <td data-label="Sesi" class="px-4 pb-2 md:p-0 md:px-6 md:py-4 whitespace-nowrap text-sm text-gray-400 flex items-center justify-between md:table-cell"><span class="font-bold text-gray-400 md:hidden mr-2">Sesi</span><span>${trade.session}</span></td>
+                    <td data-label="Tanggal" class="px-4 pb-2 md:p-0 md:px-6 md:py-4 whitespace-nowrap text-sm text-gray-400 flex items-center justify-between md:table-cell"><span class="font-bold text-gray-400 md:hidden mr-2">Tanggal</span><span>${new Date(trade.date).toLocaleDateString('id-ID', { timeZone: 'UTC' })}</span></td>
+                    <td class="p-4 md:px-6 md:py-4 whitespace-nowrap text-right text-sm font-medium">
+                        <button onclick="openModal('${trade.id}')" class="text-gray-400 hover:text-white mr-3">Lihat</button>
+                        <button onclick="editTrade('${trade.id}')" class="text-blue-400 hover:text-blue-300 mr-3">Edit</button>
+                        <button onclick="deleteTrade('${trade.id}')" class="text-red-400 hover:text-red-300">Hapus</button>
+                    </td>
+                </tr>
+            `;
+            tradeLogTable.insertAdjacentHTML('beforeend', row);
+        });
+    }
+
+    function updateDashboard() {
+        if (trades.length === 0) {
+            // Reset dashboard
+            dashboardElements.totalPnl.textContent = '$0.00';
+            dashboardElements.winRate.textContent = '0%';
+            dashboardElements.totalTrades.textContent = '0';
+            dashboardElements.profitFactor.textContent = '0.00';
+            if (equityCurveChart) equityCurveChart.destroy();
+            if (strategyPerformanceChart) strategyPerformanceChart.destroy();
+            return;
+        };
+
+        let totalPnl = 0;
+        let totalWins = 0;
+        let totalGrossProfit = 0;
+        let totalGrossLoss = 0;
+        const equityData = [0];
+        const strategyPerformance = {};
+
+        trades.forEach(trade => {
+            totalPnl += trade.pnl;
+            equityData.push(totalPnl);
+
+            if (trade.status === 'Win') {
+                totalWins++;
+                totalGrossProfit += trade.pnl;
+            } else if (trade.status === 'Loss') {
+                totalGrossLoss += Math.abs(trade.pnl);
+            }
+
+            if (!strategyPerformance[trade.strategy]) {
+                strategyPerformance[trade.strategy] = { win: 0, loss: 0 };
+            }
+            if (trade.status === 'Win') {
+                strategyPerformance[trade.strategy].win++;
+            } else if (trade.status === 'Loss') {
+                strategyPerformance[trade.strategy].loss++;
+            }
+        });
+
+        const winRate = (trades.length > 0) ? (totalWins / trades.length) * 100 : 0;
+        const profitFactor = totalGrossLoss > 0 ? (totalGrossProfit / totalGrossLoss) : Infinity;
+        
+        dashboardElements.totalPnl.textContent = `$${totalPnl.toFixed(2)}`;
+        if (totalPnl > 0) {
+            dashboardElements.totalPnl.className = 'text-2xl font-bold mt-1 text-green-400';
+            dashboardElements.pnlIcon.className = 'w-12 h-12 rounded-full flex items-center justify-center bg-green-900/50';
+            dashboardElements.pnlIcon.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" /></svg>`;
+        } else if (totalPnl < 0) {
+            dashboardElements.totalPnl.className = 'text-2xl font-bold mt-1 text-red-400';
+            dashboardElements.pnlIcon.className = 'w-12 h-12 rounded-full flex items-center justify-center bg-red-900/50';
+            dashboardElements.pnlIcon.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6" /></svg>`;
+        }
+        
+        dashboardElements.winRate.textContent = `${winRate.toFixed(1)}%`;
+        dashboardElements.totalTrades.textContent = trades.length;
+        dashboardElements.profitFactor.textContent = profitFactor.toFixed(2);
+
+        renderEquityCurveChart(equityData);
+        renderStrategyPerformanceChart(strategyPerformance);
+    }
+
+    // -- CHART RENDERING --
+    // ... (Chart rendering functions remain the same)
+    function renderEquityCurveChart(equityData) {
+        const ctx = document.getElementById('equityCurveChart').getContext('2d');
+        if (equityCurveChart) equityCurveChart.destroy();
+        const gradient = ctx.createLinearGradient(0, 0, 0, 400);
+        gradient.addColorStop(0, 'rgba(37, 99, 235, 0.5)');
+        gradient.addColorStop(1, 'rgba(37, 99, 235, 0)');
+        equityCurveChart = new Chart(ctx, { type: 'line', data: { labels: Array.from({ length: equityData.length }, (_, i) => i), datasets: [{ label: 'Equity ($)', data: equityData, borderColor: '#3b82f6', backgroundColor: gradient, borderWidth: 2, pointRadius: 0, tension: 0.4, fill: true }] }, options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: false, grid: { color: 'rgba(255, 255, 255, 0.1)' }, ticks: { color: '#9ca3af' } }, x: { grid: { display: false }, ticks: { color: '#9ca3af', display: false } } }, plugins: { legend: { display: false } } } });
+    }
+    function renderStrategyPerformanceChart(strategyData) {
+        const ctx = document.getElementById('strategyPerformanceChart').getContext('2d');
+        if (strategyPerformanceChart) strategyPerformanceChart.destroy();
+        const labels = Object.keys(strategyData);
+        const winData = labels.map(label => strategyData[label].win);
+        const lossData = labels.map(label => strategyData[label].loss);
+        strategyPerformanceChart = new Chart(ctx, { type: 'bar', data: { labels: labels, datasets: [ { label: 'Win', data: winData, backgroundColor: 'rgba(16, 185, 129, 0.7)', borderColor: '#10b981', borderWidth: 1 }, { label: 'Loss', data: lossData, backgroundColor: 'rgba(239, 68, 68, 0.7)', borderColor: '#ef4444', borderWidth: 1 } ] }, options: { responsive: true, maintainAspectRatio: false, indexAxis: 'y', scales: { y: { stacked: true, grid: { display: false }, ticks: { color: '#9ca3af' } }, x: { stacked: true, grid: { color: 'rgba(255, 255, 255, 0.1)' }, ticks: { color: '#9ca3af' } } }, plugins: { legend: { position: 'bottom', labels: { color: '#9ca3af' } } } } });
+    }
+
+    // -- INITIALIZATION --
+    document.addEventListener('DOMContentLoaded', () => {
+        form = document.getElementById('trade-form');
+        form.addEventListener('submit', handleFormSubmit);
+        document.getElementById('date').valueAsDate = new Date();
+
+        // P/L Auto-calculator listeners
+        const pnlFields = ['entry-price', 'exit-price', 'quantity', 'position'];
+        pnlFields.forEach(id => {
+            document.getElementById(id).addEventListener('input', calculatePnl);
+        });
+
+        // Modal close listener
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) closeModal();
+        });
+
+        // Delete confirmation logic
+        // This is a bit of a trick to avoid adding a global function for confirmDelete
+        window.confirmDelete = (id) => {
+            trades = trades.filter(t => t.id !== id);
+            saveTrades();
+            renderTradeLog();
+            updateDashboard();
+            closeModal();
+        };
+
+        // I've also replaced the native confirm() with a custom modal in the deleteTrade function.
+        const originalDeleteTrade = window.deleteTrade;
+        window.deleteTrade = (id) => {
+            const trade = trades.find(t => t.id === id);
+            if (!trade) return;
+            openModal(id); // First open the details
+            
+            modalContent.innerHTML = `
+                <h2 class="text-xl font-bold text-white mb-4">Konfirmasi Hapus</h2>
+                <p class="text-gray-300 mb-6">Apakah Anda yakin ingin menghapus trade untuk aset <strong>${trade.asset}</strong>?</p>
+                <div class="flex justify-end space-x-4">
+                    <button onclick="openModal('${id}')" class="px-4 py-2 border border-gray-600 rounded-md text-sm font-medium text-gray-300 hover:bg-gray-700">Batal</button>
+                    <button onclick="confirmDelete('${id}')" class="px-4 py-2 bg-red-600 text-white rounded-md text-sm font-medium hover:bg-red-700">Ya, Hapus</button>
+                </div>
+            `;
+        };
+
+        loadTrades();
+        renderTradeLog();
+        updateDashboard();
+        switchView('dashboard');
+        
+        // Trigger animations
+        document.querySelectorAll('.stat-card').forEach(card => {
+            card.classList.add('fade-in-up');
+        });
+    });
+
+</script>
+</body>
+</html>
+
