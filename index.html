@@ -393,13 +393,19 @@
     updateDashboard();
 }
     function createJournal(name, type) {
-        if (!name.trim()) return;
-        const newId = `j_${Date.now()}`;
-        journals.allJournals[newId] = { name: name.trim(), type: type };
-        localStorage.setItem(`journal_${newId}`, JSON.stringify({ startingEquity: 0, trades: [] }));
-        switchJournal(newId);
-        closeModal();
-    }
+    if (!name.trim()) return;
+    const newId = `j_${Date.now()}`;
+    journals.allJournals[newId] = { name: name.trim(), type: type };
+
+    // ❗ FIX: pastikan jurnal baru benar-benar memiliki state baru
+    localStorage.setItem(`journal_${newId}`, JSON.stringify({
+        startingEquity: 0,
+        trades: []
+    }));
+
+    switchJournal(newId);
+    closeModal();
+}
     function renameJournal(journalId, newName) {
         if (!newName.trim()) return;
         journals.allJournals[journalId].name = newName.trim();
@@ -783,6 +789,7 @@
 </script>
 </body>
 </html>
+
 
 
 
