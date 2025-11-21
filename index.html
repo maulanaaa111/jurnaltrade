@@ -262,6 +262,7 @@
                                 <option>USD/JPY</option>
                                 <option>S&P500</option>
                                 <option>US30</option>
+                                <option>USOIL</option>
                             </select>
                         </div>
                         <div>
@@ -338,6 +339,21 @@
     let modalContainer = null;
     let currentJournalNameEl = null;
     let journalSwitcherEl = null;
+    const assetType = {
+    "XAU/USD": "gold",
+    "EUR/USD": "forex",
+    "GBP/USD": "forex",
+    "USD/JPY": "forexJPY",
+
+    "NASDAQ": "index",
+    "S&P500": "index",
+    "US30": "index",
+
+    "USOIL": "oil",
+
+    "BTC/USD": "crypto",
+    "ETH/USD": "crypto"
+};
 
     // --- DATA MANAGEMENT ---
     function loadData() {
@@ -559,16 +575,48 @@
 
     // --- CORE LOGIC & CALCULATIONS ---
     function calculatePnl() {
-        const entry = parseFloat(document.getElementById('entry-price').value), exit = parseFloat(document.getElementById('exit-price').value), quantity = parseFloat(document.getElementById('quantity').value), position = document.getElementById('position').value, asset = document.getElementById('asset').value, pnlInput = document.getElementById('pnl');
-        if (isNaN(entry) || isNaN(exit) || isNaN(quantity)) { pnlInput.value = ''; return; }
-        let multiplier = 1;
-        switch(asset) {
-            case 'XAU/USD': multiplier = 100; break;
-            case 'EUR/USD': case 'GBP/USD': multiplier = 100000; break;
-        }
-        let pnl = position === 'Long' ? (exit - entry) * quantity * multiplier : (entry - exit) * quantity * multiplier;
-        pnlInput.value = pnl.toFixed(2);
+    const entry = parseFloat(document.getElementById('entry-price').value),
+          exit = parseFloat(document.getElementById('exit-price').value),
+          qty = parseFloat(document.getElementById('quantity').value),
+          position = document.getElementById('position').value,
+          asset = document.getElementById('asset').value,
+          pnlInput = document.getElementById('pnl');
+
+    if (isNaN(entry) || isNaN(exit) || isNaN(qty)) {
+        pnlInput.value = '';
+        return;
     }
+
+    const pnl = calculatePnL(asset, entry, exit, qty, position);
+    pnlInput.value = pnl.toFixed(2);
+}
+    function calculatePnL(asset, entry, exit, qty, position) {
+    const type = assetType[asset];
+    const diff = position === 'Long' ? (exit - entry) : (entry - exit);
+
+    switch (type) {
+        case "forex":          // EUR/USD, GBP/USD dll
+            return diff * qty * 100000;
+
+        case "forexJPY":       // USD/JPY
+            return diff * qty * 1000;
+
+        case "gold":           // XAU/USD
+            return diff * qty * 100;
+
+        case "index":          // NASDAQ, S&P500, US30
+            return diff * qty * 1;
+
+        case "oil":            // USOIL
+            return diff * qty * 1000;
+
+        case "crypto":         // BTC/USD, ETH/USD
+            return diff * qty * 1;
+
+        default:
+            return diff * qty;
+    }
+}
     function handleFormSubmit(e) {
         e.preventDefault();
         const tradeId = document.getElementById('trade-id').value, pnl = parseFloat(document.getElementById('pnl').value);
@@ -789,6 +837,7 @@
 </script>
 </body>
 </html>
+
 
 
 
