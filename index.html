@@ -29,6 +29,11 @@
             color: var(--text-primary);
             overflow-x: hidden;
         }
+        html,body{
+            overflow-y: auto !important;
+            overscroll-behavior: none;
+            height: 100%;
+        }
 
         .panel {
             background: var(--bg-panel);
@@ -131,11 +136,6 @@
             -webkit-overflow-scrolling: touch;
             overscroll-behavior: contain;
             touch-action: pan-y;
-        }
-        html,body{
-            overflow-y: auto !important;
-            overscroll-behavior:none;
-            height: 100%;
         }
     </style>
 </head>
@@ -850,6 +850,7 @@
 </script>
 </body>
 </html>
+
 
 
 
