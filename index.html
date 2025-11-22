@@ -124,6 +124,13 @@
         input[type=number] {
             -moz-appearance: textfield;
         }
+        #tradeLogsWrapper {
+    height: calc(100vh - 150px); /* sesuaikan kalau header kamu lebih kecil/besar */
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+}
+
     </style>
 </head>
 <body class="antialiased">
@@ -314,9 +321,11 @@
                         </div>
                     </form>
                 </div>
-                <div id="trade-log-container">
-                    <!-- Table populated by JS -->
-                </div>
+                <div id="tradeLogsWrapper">
+                    <div id="trade-log-container">
+                         <!-- Table populated by JS -->
+                        </div>
+                    </div>
             </div>
         </main>
     </div>
@@ -837,6 +846,7 @@
 </script>
 </body>
 </html>
+
 
 
 
