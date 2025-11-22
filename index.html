@@ -29,11 +29,6 @@
             color: var(--text-primary);
             overflow-x: hidden;
         }
-        html,body{
-            overflow-y: auto !important;
-            overscroll-behavior: none;
-            height: 100%;
-        }
 
         .panel {
             background: var(--bg-panel);
@@ -42,6 +37,11 @@
             border: 1px solid var(--border-color);
             box-shadow: 0 0 25px rgba(0, 190, 255, 0.08);
             transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+        .panel:hover {
+         border-color: var(--glow-color);
+         /* transform: translateY(-2px); */ /* HAPUS INI */
+         box-shadow: 0 10px 30px rgba(0, 190, 255, 0.15);
         }
 
         ::-webkit-scrollbar { width: 8px; }
@@ -127,7 +127,6 @@
         #tradeLogsWrapper{
             max-height: calc(100vh - 150px);
             overflow-y: auto;
-            overflow-x: hidden;
             -webkit-overflow-scrolling: touch;
             overscroll-behavior: contain;
             touch-action: pan-y;
