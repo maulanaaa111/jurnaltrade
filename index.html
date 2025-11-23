@@ -598,7 +598,9 @@
             return diff * qty * 100000;
 
         case "forexJPY":       // USD/JPY
-            return diff * qty * 10000;
+             const pipDiff = diff / 0.01;    // hitung jumlah pip
+            const pipValue = 10;            // $10 per pip untuk 1 lot
+            return pipDiff * qty * pipValue;
 
         case "gold":           // XAU/USD
             return diff * qty * 100;
@@ -836,6 +838,7 @@
 </script>
 </body>
 </html>
+
 
 
 
