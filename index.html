@@ -632,7 +632,9 @@
             type: 'trade', 
             timestamp: existingTrade ? existingTrade.timestamp : Date.now(), 
             date: document.getElementById('date').value, 
-            session: Array.from(document.getElementById('session').selectedOptions).map(opt=> opt.value).join(', '), 
+            session: Array.from(document.getElementById('session').selectedOptions)
+                .map(opt=> opt.value)
+                .join(', '), 
             asset: document.getElementById('asset').value, 
             strategy: document.getElementById('strategy').value, 
             position: document.getElementById('position').value, 
@@ -842,6 +844,7 @@
 </script>
 </body>
 </html>
+
 
 
 
