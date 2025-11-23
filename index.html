@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Jurnal Trading Pro</title>
+    <title>Jurnal Trading By MaulKod</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -244,11 +244,18 @@
                         </div>
                         <div>
                             <label for="session" class="block text-sm font-medium text-gray-300">Sesi Trading</label>
-                            <select id="session" required class="mt-1 hud-input block w-full rounded-md shadow-sm text-white">
+                            <select id="session" multiple class="mt-1 hud-input block w-full rounded-md shadow-sm text-white">
                                 <option>Sesi Asia</option>
                                 <option>Sesi London</option>
                                 <option>Sesi New York</option>
                                 <option>Overlap LDN/NY</option>
+                                <option>SB London</option>
+                                <option>SB New York AM</option>
+                                <option>SB New York PM</option>
+                                <option>Macro xx.50-xx.10</option>
+                                <option>Macro xx.20-xx.40</option>
+                                <option>London Killzone</option>
+                                <option>New York Killzone</option>
                             </select>
                         </div>
                         <div>
@@ -625,7 +632,7 @@
             type: 'trade', 
             timestamp: existingTrade ? existingTrade.timestamp : Date.now(), 
             date: document.getElementById('date').value, 
-            session: document.getElementById('session').value, 
+            session: Array.from(document.getElementById('session').selectedOptions).map(opt=> opt.value).join(', '), 
             asset: document.getElementById('asset').value, 
             strategy: document.getElementById('strategy').value, 
             position: document.getElementById('position').value, 
@@ -835,6 +842,7 @@
 </script>
 </body>
 </html>
+
 
 
 
