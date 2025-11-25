@@ -360,6 +360,22 @@
     "ETH/USD": "crypto"
 };
 
+    const pairData = {
+        "XAUUSD": 100,
+        "EURUSD": 100000,
+        "GBPUSD": 100000,
+        "USDJPY": 635,
+        "BTCUSD": 1,
+        "ETHUSD": 1,
+        "USOIL": 1,
+        "NASDAQ" : 1,
+        "US500": 1,
+        "US30": 1,
+        "NASDAQx100" : 100,
+        "US500x100" : 100,
+        "US30x100" : 100
+    }
+
     // --- DATA MANAGEMENT ---
     function loadData() {
     const journalsMeta = JSON.parse(localStorage.getItem('tradingJournals')) || null;
@@ -548,6 +564,19 @@
         showModal(content);
         calculateLotSize();
     }
+    function loadPairsToSelect() {
+        const select = document.getElementById("lc-pair");
+        if (!select) return;
+
+        select.innerHTML = "";
+
+        Object.keys(pairData).forEach(p => {
+            const opt = document.creatElement("option");
+            opt.value =  p;
+            opt.textContent = p;
+            select.appendChild(opt);
+        });
+    }
     function calculateLotSize() {
         const balance = parseFloat(document.getElementById('lc-balance').value) || 0;
         const riskPercent = parseFloat(document.getElementById('lc-risk').value) || 0;
@@ -557,25 +586,21 @@
         const resultEl = document.getElementById('lc-result');
         const accountType = journals.allJournals[currentJournalId].type;
         if (balance <= 0 || riskPercent <= 0 || stopLossDistance <= 0) { resultEl.textContent = '0.00'; return; }
+        const contractSize = pairData[pair];
+        if (!contractSize) {
+            resultEl.textContent = '0.00';
+            return;
+        }
+        
         const riskAmount = balance * (riskPercent / 100);
-        
-        let valuePerUnitPerLot = 1; // Default for points on all pairs, and pips on Indices/Crypto
-        if (unit === 'pips') {
-            if (['EUR/USD', 'GBP/USD', 'XAU/USD','USD/JPY','NASDAQ', 'US500', 'US30', 'USOIL', 'BTC/USD', 'ETH/USD'].includes(pair)) {
-                valuePerUnitPerLot = 10; // $10 per pip for these pairs on a standard lot
-            }
+
+        let stopValue = stopLossDistance;
+
+        if (unit === "pips") {
+            stopValue = stopLossDistance * (pair.include("JPY") ? 0.01 : 0.0001);
         }
-        
-        const stopLossInCurrency = stopLossDistance * valuePerUnitPerLot;
-        let lotSize = 0;
-        if (stopLossInCurrency > 0) {
-            lotSize = riskAmount / stopLossInCurrency;
-        }
-        
-        if (accountType === 'cent') {
-            lotSize *= 100;
-        }
-        resultEl.textContent = lotSize.toFixed(2);
+        const lotSize = riskAmount / (stopValue * contractSize);
+        resultEl.textContent = lotSize.toFixed(3);
     }
 
     // --- CORE LOGIC & CALCULATIONS ---
@@ -841,10 +866,12 @@
         renderTradeLog();
         updateDashboard();
         switchView('dashboard');
+        loadPairsToSelect();
     });
 </script>
 </body>
 </html>
+
 
 
 
