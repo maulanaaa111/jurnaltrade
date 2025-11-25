@@ -239,11 +239,11 @@
                     <form id="trade-form" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                         <input type="hidden" id="trade-id">
                         <div>
-                            <label for="date" class="block text-sm font-medium text-gray-300">Tanggal</label>
+                            <label for="date" class="block text-sm font-medium text-gray-300">Date</label>
                             <input type="date" id="date" required class="mt-1 hud-input block w-full rounded-md shadow-sm text-white">
                         </div>
                         <div>
-                            <label for="session" class="block text-sm font-medium text-gray-300">Sesi Trading</label>
+                            <label for="session" class="block text-sm font-medium text-gray-300">Time</label>
                             <select id="session" multiple class="mt-1 hud-input block w-full rounded-md shadow-sm text-white">
                                 <option>Sesi Asia</option>
                                 <option>Sesi London</option>
@@ -270,6 +270,7 @@
                                 <option>US500</option>
                                 <option>US30</option>
                                 <option>USOIL</option>
+                                <option>NASDAQx100</option>
                             </select>
                         </div>
                         <div>
@@ -354,6 +355,9 @@
     "NASDAQ": "index",
     "US500": "index",
     "US30": "index",
+    "NASDAQx100": "indexx",
+    "US500x100": "indexx",
+    "US30x100": "indexx",
 
     "USOIL": "oil",
 
@@ -617,6 +621,8 @@
 
         case "crypto":         // BTC/USD, ETH/USD
             return diff * qty * 1;
+        case "indexx":
+            return diff * qty * 10;
 
         default:
             return diff * qty;
@@ -844,6 +850,7 @@
 </script>
 </body>
 </html>
+
 
 
 
