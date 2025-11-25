@@ -271,6 +271,8 @@
                                 <option>US30</option>
                                 <option>USOIL</option>
                                 <option>NASDAQx100</option>
+                                <option>US500x100</option>
+                                <option>US30x100</option>
                             </select>
                         </div>
                         <div>
@@ -622,7 +624,7 @@
         case "crypto":         // BTC/USD, ETH/USD
             return diff * qty * 1;
         case "indexx":
-            return diff * qty * 10;
+            return diff * qty * 100;
 
         default:
             return diff * qty;
@@ -850,6 +852,7 @@
 </script>
 </body>
 </html>
+
 
 
 
