@@ -32,14 +32,15 @@
 
         .panel {
             background: var(--bg-panel);
-            backdrop-filter: blur(7px);
-            -webkit-backdrop-filter: blur(7px);
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
             border: 1px solid var(--border-color);
-            box-shadow: 0 0 35px rgba(0, 190, 255, 0.10);
+            box-shadow: 0 0 18px rgba(0, 190, 255, 0.08);
+            transition: box-shadow .20s ease-out, border-color .20s ease-out;
         }
         .panel:hover {
             border-color: var(--glow-color);
-         box-shadow: 0 0 25px rgba(0,90,225,0.15);
+         box-shadow: 0 0 28px rgba(0,90,225,0.17);
         }
 
         ::-webkit-scrollbar { width: 8px; }
@@ -879,6 +880,7 @@
 </script>
 </body>
 </html>
+
 
 
 
