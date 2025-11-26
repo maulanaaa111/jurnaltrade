@@ -577,7 +577,7 @@
         trades.forEach(item => { item.type === 'deposit' ? currentEquity += item.amount : item.type === 'trade' ? currentEquity += item.pnl : null; });
         const accountType = journals.allJournals[currentJournalId].type;
         const typeLabel = accountType === 'cent' ? 'Cent Lot' : 'Standard Lot';
-        const content = '<h2 class="text-xl font-bold text-white mb-4">Kalkulator Lot Size</h2><div class ="space-y-4"><div> <label class="block text-sm"> Saldo </label><input type="number" id="lc-risk" value="1" class ="hud-input w-full" oninput ="calculateLotSize()"></div><div> <label class="block text-sm">Risiko (%)</label><input type="number" id="lc-risk" value="1" class="hud-input w-full" oninput="calculateLotSize()"></div><div> <label class="block text-sm">Pair</label> <select id="lc-pair" class="hud-input w-full" onchange="calculateLotSize()"></select></div><div><label class="block text-sm">Stop Loss</label><div class="flex"> <input type="number" id="lc-sl" class="hud-input flex-1" oninput="calculateLotSize()"><select id="lc-unit" class="hud-input" onchange="calculateLotSize()"> <option value="pips">Pips</option><option value="points">Points</option></select></div></div></div><div class="mt-6 text-center"><p class="text-sm"> Ukuran Lot </p><p id="lc-result" class="text-3xl font-bold text-[var(--accent-cyan)]">0.00</p></div>  ';
+        const content = '<h2 class="text-xl font-bold text-white mb-4">Kalkulator Lot Size</h2><div class ="space-y-4"><div> <label class="block text-sm"> Saldo Akun </label><input type="number" id="lc-balance" value="1" class ="hud-input w-full" oninput ="calculateLotSize()"></div><div> <label class="block text-sm">Risiko (%)</label><input type="number" id="lc-risk" value="1" class="hud-input w-full" oninput="calculateLotSize()"></div><div> <label class="block text-sm">Pair</label> <select id="lc-pair" class="hud-input w-full" onchange="calculateLotSize()"></select></div><div><label class="block text-sm">Stop Loss</label><div class="flex"> <input type="number" id="lc-sl" class="hud-input flex-1" oninput="calculateLotSize()"><select id="lc-unit" class="hud-input" onchange="calculateLotSize()"> <option value="pips">Pips</option><option value="points">Points</option></select></div></div></div><div class="mt-6 text-center"><p class="text-sm"> Ukuran Lot </p><p id="lc-result" class="text-3xl font-bold text-[var(--accent-cyan)]">0.00</p></div>  ';
         showModal(content);
         setTimeout(() => {
             loadPairsToSelect();
@@ -878,6 +878,7 @@
 </script>
 </body>
 </html>
+
 
 
 
