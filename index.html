@@ -31,16 +31,16 @@
         }
 
         .panel {
-            background: var(--bg-panel);
-            backdrop-filter: blur(6px);
-            -webkit-backdrop-filter: blur(6px);
-            border: 1px solid var(--border-color);
-            box-shadow: 0 0 18px rgba(0, 190, 255, 0.08);
-            transition: box-shadow .20s ease-out, border-color .20s ease-out;
+            background: rgba(10,20,40,0.45);
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+            border: 1px solid rgba(0,190,255,0.15);
+            box-shadow: 0 0 10px rgba(0, 190, 255, 0.10);
+            transition: border-color .20s ease-out;
         }
         .panel:hover {
-            border-color: var(--glow-color);
-         box-shadow: 0 0 28px rgba(0,90,225,0.17);
+            border-color: rgba(0,190,255,0.55);
+         box-shadow: 0 0 14px rgba(0,90,225,0.17);
         }
 
         ::-webkit-scrollbar { width: 8px; }
@@ -88,8 +88,8 @@
 
         .aurora-background { position: fixed !important; pointer-events: none !important; inset: 0; z-index: -1:  }
         .aurora-blob {animation: move 50s infinite alternate; will-change: transform;}
-        .blob1 { width: 450px; height: 450px; opacity: 0.14;}
-        .blob2 { width: 550px; height: 550px; opacity: 0.14; }
+        .blob1 { width: 450px; height: 450px; opacity: 0.08;}
+        .blob2 { width: 550px; height: 550px; opacity: 0.08; }
         @keyframes move {
             from { transform: translate(0, 0) rotate(0deg) scale(1); }
             to { transform: translate(60px, 30px) rotate(180deg) scale(1.05); }
@@ -880,6 +880,7 @@
 </script>
 </body>
 </html>
+
 
 
 
