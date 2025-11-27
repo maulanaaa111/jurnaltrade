@@ -367,18 +367,19 @@
   /* =========================
    LOT CALCULATOR - FIXED
    ========================= */
-const PAIR_INFO = {
-    "XAU/USD": 100,
-    "EUR/USD": 10,
-    "GBP/USD": 10,
-    "USD/JPY": 635,
-    "NASDAQ": 1,
-    "US500": 1,
+const PAIR_VALUE = {
+    "EURUSD": 10,
+    "GBPUSD": 10,
+    "USDJPY": 9.3,
+    "XAUUSD": 1,
     "US30": 1,
-    "USOIL": 1000,
-    "BTC/USD": 1,
-    "ETH/USD": 1
+    "US100": 1,
+    "US500": 1,
+    "BTCUSD": 1,
+    "ETHUSD": 1,
+    "USOIL": 10
 };
+
 
 function openLotCalculator() {
     const accountType = journals.allJournals[currentJournalId].type;
@@ -437,7 +438,7 @@ function populatePairsNew() {
 
     select.innerHTML = "";
 
-    Object.keys(PAIR_INFO).forEach(pair => {
+    Object.keys(PAIR_VALUE).forEach(pair => {
         const opt = document.createElement("option");
         opt.value = pair;
         opt.textContent = pair;
@@ -445,44 +446,43 @@ function populatePairsNew() {
     });
 }
 
+
 function calculateLotNew() {
     const balance = parseFloat(document.getElementById("lc-balance")?.value) || 0;
     const riskPct = parseFloat(document.getElementById("lc-risk")?.value) || 0;
     const slDistance = parseFloat(document.getElementById("lc-sl")?.value) || 0;
+
     const pair = document.getElementById("lc-pair")?.value;
     const unit = document.getElementById("lc-unit")?.value;
-
     const resultEl = document.getElementById("lc-result");
 
     if (!resultEl || !pair || balance <= 0 || riskPct <= 0 || slDistance <= 0) {
-        if (resultEl) resultEl.textContent = "0.00";
+        resultEl.textContent = "0.00";
         return;
     }
 
-    const contract = PAIR_INFO[pair];
-    if (!contract) {
+    const pipValue = PAIR_VALUE[pair];
+    if (!pipValue) {
         resultEl.textContent = "0.00";
         return;
     }
 
     const riskAmount = balance * (riskPct / 100);
 
-    let stopValue;
+    let sl = slDistance;
 
-    if (unit === "pips") {
-        const pipSize = pair.includes("JPY") ? 0.01 : 0.0001;
-        stopValue = slDistance * pipSize;
-    } else {
-        stopValue = slDistance;
-    }
+    // Index biasanya pakai points, forex pakai pips → sudah benar
+    let lot = riskAmount / (sl * pipValue);
 
-    let lot = riskAmount / (stopValue * contract);
-
+    // Cent account: NO multiplier
     const accountType = journals.allJournals[currentJournalId].type;
-    if (accountType === "cent") lot *= 100;
+    if (accountType === "cent") {
+        // nothing
+    }
 
     resultEl.textContent = lot.toFixed(3);
 }
+
 
 
     // --- DATA MANAGEMENT ---
@@ -933,6 +933,7 @@ function calculateLotNew() {
 </script>
 </body>
 </html>
+
 
 
 
