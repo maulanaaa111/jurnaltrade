@@ -456,7 +456,7 @@ function calculateLotNew() {
     const unit = document.getElementById("lc-unit")?.value;
     const resultEl = document.getElementById("lc-result");
 
-    if (!resultEl || !pair || balance <= 0 || riskPct <= 0 || slDistance <= 0) {
+    if (!pair || balance <= 0 || riskPct <= 0 || slDistance <= 0) {
         resultEl.textContent = "0.00";
         return;
     }
@@ -467,21 +467,33 @@ function calculateLotNew() {
         return;
     }
 
+    let multiplier = 1;
+
+    // --- FIX BESARAN PIPS DAN POINTS ---
+    if (unit === "pips") {
+        if (pair.includes("JPY")) multiplier = 0.01;
+        else if (pair === "XAUUSD") multiplier = 0.10;
+        else multiplier = 0.0001;
+    } else if (unit === "points") {
+        if (pair.includes("JPY")) multiplier = 0.001;
+        else if (pair === "XAUUSD") multiplier = 0.01;
+        else multiplier = 0.00001;
+    }
+
     const riskAmount = balance * (riskPct / 100);
+    const valuePerSL = slDistance * multiplier * pipValue;
 
-    let sl = slDistance;
+    let lot = riskAmount / valuePerSL;
 
-    // Index biasanya pakai points, forex pakai pips → sudah benar
-    let lot = riskAmount / (sl * pipValue);
-
-    // Cent account: NO multiplier
+    // Cent account tidak ada multiplier
     const accountType = journals.allJournals[currentJournalId].type;
     if (accountType === "cent") {
-        // nothing
+        // no multiplier
     }
 
     resultEl.textContent = lot.toFixed(2);
 }
+
 
 
 
@@ -933,6 +945,7 @@ function calculateLotNew() {
 </script>
 </body>
 </html>
+
 
 
 
