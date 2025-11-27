@@ -364,21 +364,21 @@
     "ETH/USD": "crypto"
 };
 
-    const pairData = {
+    const PAIR_INFO = {
+        "EURUSD": 10,
+        "GBPUSD": 10,
         "XAUUSD": 100,
-        "EURUSD": 100000,
-        "GBPUSD": 100000,
         "USDJPY": 635,
-        "BTCUSD": 1,
-        "ETHUSD": 1,
-        "USOIL": 1,
-        "NASDAQ" : 1,
-        "US500": 1,
+        "NASDAQ": 1,
+        "US500":1,
         "US30": 1,
-        "NASDAQx100" : 100,
-        "US500x100" : 100,
-        "US30x100" : 100
-    };
+        "NASDAQx100": 100,
+        "US500x100": 100,
+        "US30x100": 100,
+        "USOIL": 1000,
+        "BTCUSD": 1,
+        "ETHUSD": 1
+    }
 
     // --- DATA MANAGEMENT ---
     function loadData() {
@@ -559,56 +559,79 @@
         showModal(content);
         setTimeout(() => document.getElementById('new-journal-name').focus(), 100);
     }
-    function loadPairsToSelect() {
-        const select = document.getElementById('lc-pair');
+    function openLotCalculator(){
+        const accountType = journals.allJournalscurrentJournalId].type;
+        const currentEquity = trades.reduce((acc, t) => {
+            if (t.type === 'deposit') return acc + t.amount;
+            if (t.type === 'trade') return acc + t.pnl;
+            return acc;
+        }, startingEquity);
+
+        const modal = '<h2 class="text-xl font-bold text-white mb-4"> Kalkulator Lot</h2><label class="block text-sm text-gray-300 mt-4"> Saldo </label><input id="lc-balance" type="number" value="${currentEquity.toFixed(2)}" class="hud-input w-full" oninput="calculateLotNew()"><label class="block text-sm text-gray-300 mt-4">Risk (%)</label><inout id="lc-risk" type="number" value="1" class="hud-input w-full" oninput="calculateLotNew()"><label class="block text-sm text-gray-300 mt-4">Pair</label><select id="lc-pair" class="hud-input w-full" onchange="calculateLotNew()></select><label class="block text-sm text-gray-300 mt-4">Stop Loss</label><div class="flex gap-2"><input id="lc-sl" type="number" placeholder="Contoh:20" class="hud-input w-full" oninput="callculateLotNew()"><select id="lc-unit" class="hud-input onchange="calculateLotNew()"><option value="pips">Pips</option><option value="points">Points</option></select></div><div class="mt-6 p-4 bg-black/20 rounded border border-gray-700 text-center"><p class="text-sm"> Ukuran Lot</p><p id="lc-result" class="text-3xl font-bold text-[var(--accent-cyan)]">0.00</p></div><div class="text-right mt-4"><button onclick="closeModal()" class="px-4 py-2 bg-[var(--accent-cyan)] rounded text-black">Tutup</button></div>';
+
+
+        showModal(modal);
+        setTimeout(() => {
+            populatePairNew();
+            calculateLotNew();
+        }, 50);
+    }
+
+    function populatePairNew() {
+        const select  = documen.getElementId("lc-pair");
         if (!select) return;
 
         select.innerHTML = "";
 
-        Object.keys(pairData).forEach(p => {
-            const opt = document.createElement('option');
-            opt.value =  p;
-            opt.textContent = p;
+        Object.keys(PAIR_INFO).forEach(pair => {
+            const opt = documen.creatElement("option");
+            opt.value = pair;
+            opt.textContent = pair;
             select.appendChild(opt);
         });
     }
-    function promptLotCalculator() {
-        let currentEquity = startingEquity;
-        trades.forEach(item => { item.type === 'deposit' ? currentEquity += item.amount : item.type === 'trade' ? currentEquity += item.pnl : null; });
-        const accountType = journals.allJournals[currentJournalId].type;
-        const typeLabel = accountType === 'cent' ? 'Cent Lot' : 'Standard Lot';
-        const content = `<h2 class="text-xl font-bold text-white mb-4">Kalkulator Lot Size</h2><p class="text-gray-400 mb-6">Hitung ukuran posisi untuk akun <strong class="${accountType === 'cent' ? 'text-purple-400' : 'text-blue-400'}">${accountType}</strong> Anda.</p><div class="space-y-4"><div><label for="lc-balance" class="block text-sm font-medium text-gray-300">Saldo Akun ($)</label><input onkeyup="calculateLotSize()" type="number" id="lc-balance" value="${currentEquity.toFixed(2)}" class="mt-1 hud-input block w-full rounded-md"></div><div><label for="lc-risk" class="block text-sm font-medium text-gray-300">Risiko (%)</label><input onkeyup="calculateLotSize()" type="number" id="lc-risk" value="1" class="mt-1 hud-input block w-full rounded-md"></div><div><label for="lc-pair" class="block text-sm font-medium text-gray-300">Pair</label><select id="lc-pair" class="hud-input w-full" onchange="calculateLotSize()"></select></div><div><label for="lc-sl" class="block text-sm font-medium text-gray-300">Jarak Stop Loss</label><div class="mt-1 flex rounded-md shadow-sm"><input onkeyup="calculateLotSize()" type="number" id="lc-sl" placeholder="Contoh: 20" class="hud-input block w-full rounded-none rounded-l-md"><select onchange="calculateLotSize()" id="lc-unit" class="hud-input block w-auto rounded-l-none rounded-r-md border-l-0 bg-gray-900/50"><option value="pips">Pips</option><option value="points">Points</option></select></div></div></div><div class="mt-8 bg-black/20 p-6 rounded-lg text-center border border-[var(--border-color)]"><p class="text-sm font-medium text-gray-400 uppercase">Ukuran Posisi (${typeLabel})</p><p id="lc-result" class="text-3xl font-bold text-[var(--accent-cyan)] mt-2">0.00</p></div><div class="flex justify-end mt-6"><button onclick="closeModal()" class="px-6 py-2 bg-[var(--accent-cyan)] text-[var(--bg-primary)] font-semibold rounded-md text-sm hover:opacity-90">Tutup</button></div>`;
-        showModal(content);
-        setTimeOut(() => {
-            loadPairsToSelect();
-            calculateLotSize();
-        },30);
-    }
-    function calculateLotSize() {
-        const balance = parseFloat(document.getElementById('lc-balance').value) || 0;
-        const riskPercent = parseFloat(document.getElementById('lc-risk').value) || 0;
-        const stopLossDistance = parseFloat(document.getElementById('lc-sl').value) || 0;
-        const unit = document.getElementById('lc-unit').value;
-        const pair = document.getElementById('lc-pair').value;
-        const resultEl = document.getElementById('lc-result');
-        const accountType = journals.allJournals[currentJournalId].type;
-        if (balance <= 0 || riskPercent <= 0 || stopLossDistance <= 0) { resultEl.textContent = '0.00'; return; }
-        const contractSize = pairData[pair];
-        if (!contractSize) {
-            resultEl.textContent = '0.00';
+
+    function calculateLotNew() {
+        const balance = parseFloat(document.getElementById("lc-balance")?.value) || 0;
+        const riskPct = parseFloat(document.getElementById("lc-risk")?.value) || 0;
+        const slDistance = parseFloat(document.getElementById("lc-sl")?.value) || 0;
+        const unit = document.getElementById("lc-unit")?.value;
+        const pair = document.getElementById("lc-pair")?.value;
+        const resultEl = document.getElementById("lc-result");
+    
+        if (!resultEl || !pair || balance <= 0 || riskPct <= 0 || slDistance <= 0) {
+            if (resultEl) resultEl.textContent = "0.00";
             return;
         }
-        
-        const riskAmount = balance * (riskPercent / 100);
-
-        let stopValue = stopLossDistance;
-
-        if (unit === "pips") {
-            stopValue = stopLossDistance * (pair.includes("JPY") ? 0.01 : 0.0001);
+    
+        const contract = PAIR_INFO[pair];
+        if (!contract) {
+            resultEl.textContent = "0.00";
+            return;
         }
-        const lotSize = riskAmount / (stopValue * contractSize);
-        resultEl.textContent = lotSize.toFixed(3);
+    
+        const accountType = journals.allJournals[currentJournalId].type;
+        const riskAmount = balance * (riskPct / 100);
+    
+        let stopValue;
+    
+        // Jika pips
+        if (unit === "pips") {
+            const pipSize = pair.includes("JPY") ? 0.01 : 0.0001;
+            stopValue = slDistance * pipSize;
+        } 
+        // Jika points (index/crypto)
+        else {
+            stopValue = slDistance;
+        }
+    
+        let lot = riskAmount / (stopValue * contract);
+    
+        if (accountType === "cent") lot *= 100;
+    
+        resultEl.textContent = lot.toFixed(3);
     }
+
 
     // --- CORE LOGIC & CALCULATIONS ---
     function calculatePnl() {
@@ -873,11 +896,11 @@
         renderTradeLog();
         updateDashboard();
         switchView('dashboard');
-        loadPairsToSelect();
     });
 </script>
 </body>
 </html>
+
 
 
 
