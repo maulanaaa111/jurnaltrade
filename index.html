@@ -368,17 +368,18 @@
    LOT CALCULATOR - FIXED
    ========================= */
 const PAIR_VALUE = {
-    "EURUSD": 10,
-    "GBPUSD": 10,
-    "USDJPY": 9.3,
-    "XAUUSD": 1,
+    "EUR/USD": 10,
+    "GBP/USD": 10,
+    "USD/JPY": 9.3,
+    "XAU/USD": 1,
     "US30": 1,
     "US100": 1,
     "US500": 1,
-    "BTCUSD": 1,
-    "ETHUSD": 1,
+    "BTC/USD": 1,
+    "ETH/USD": 1,
     "USOIL": 10
 };
+
 
 
 function openLotCalculator() {
@@ -447,11 +448,11 @@ function populatePairsNew() {
 }
 
 
+
 function calculateLotNew() {
     const balance = parseFloat(document.getElementById("lc-balance")?.value) || 0;
     const riskPct = parseFloat(document.getElementById("lc-risk")?.value) || 0;
     const slDistance = parseFloat(document.getElementById("lc-sl")?.value) || 0;
-
     const pair = document.getElementById("lc-pair")?.value;
     const unit = document.getElementById("lc-unit")?.value;
     const resultEl = document.getElementById("lc-result");
@@ -467,32 +468,27 @@ function calculateLotNew() {
         return;
     }
 
-    let multiplier = 1;
+    // Tentukan besar pips / points sesuai pair
+    let multiplier;
 
-    // --- FIX BESARAN PIPS DAN POINTS ---
     if (unit === "pips") {
         if (pair.includes("JPY")) multiplier = 0.01;
-        else if (pair === "XAUUSD") multiplier = 0.10;
+        else if (pair === "XAU/USD") multiplier = 0.10;
         else multiplier = 0.0001;
-    } else if (unit === "points") {
+    } else { // points
         if (pair.includes("JPY")) multiplier = 0.001;
-        else if (pair === "XAUUSD") multiplier = 0.01;
+        else if (pair === "XAU/USD") multiplier = 0.01;
         else multiplier = 0.00001;
     }
 
     const riskAmount = balance * (riskPct / 100);
     const valuePerSL = slDistance * multiplier * pipValue;
 
-    let lot = riskAmount / valuePerSL;
-
-    // Cent account tidak ada multiplier
-    const accountType = journals.allJournals[currentJournalId].type;
-    if (accountType === "cent") {
-        // no multiplier
-    }
+    const lot = riskAmount / valuePerSL;
 
     resultEl.textContent = lot.toFixed(2);
 }
+
 
 
 
@@ -945,6 +941,7 @@ function calculateLotNew() {
 </script>
 </body>
 </html>
+
 
 
 
