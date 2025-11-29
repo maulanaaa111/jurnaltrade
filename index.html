@@ -368,30 +368,37 @@
    LOT CALCULATOR - FIXED
    ========================= */
 const PAIR_VALUE = {
-    // Forex mayor
+    // Forex mayor (per 1 pip / 1 lot)
     "EURUSD":   { pip: 10,  point: 1 },
     "GBPUSD":   { pip: 10,  point: 1 },
     "AUDUSD":   { pip: 10,  point: 1 },
     "NZDUSD":   { pip: 10,  point: 1 },
 
-    // Yen pairs
-    "USDJPY":   { pip: 10, point: 1 }, 
-    "GBPJPY":   { pip: 10, point: 1 }, 
-    "EURJPY":   { pip: 10, point: 1 },
+    // Forex vs Yen (JPY pairs)
+    // 1 pip = 0.01 → pip value tetap $10
+    "USDJPY":   { pip: 10,  point: 1 },
+    "GBPJPY":   { pip: 10,  point: 1 },
+    "EURJPY":   { pip: 10,  point: 1 },
 
-    // Gold
-    "XAUUSD":   { pip: 1, point: 0.1 },
+    // XAU/USD (Emas)
+    // 1 pip = 0.1 → pip value $10, bukan 1
+    // FIX & AKURAT
+    "XAUUSD":   { pip: 10, point: 1 },
 
-    // Indeks
+    // Indeks (standar CFD)
     "US30":     { pip: 1, point: 1 },
     "US100":    { pip: 1, point: 1 },
     "US500":    { pip: 1, point: 1 },
 
-    // Oil
+    // Minyak (Oil)
+    // 1 pip = $1 → tapi broker pakai 0.01 → pip value = $10
     "USOIL":    { pip: 10, point: 1 },
 
-    // Crypto (pip = $1)
+    // Crypto (per $1 move)
+    // BTC 1$ move = $1 per lot
     "BTCUSD":   { pip: 1, point: 0.1 },
+
+    // ETH sama kaya BTC
     "ETHUSD":   { pip: 1, point: 0.1 }
 };
 
@@ -945,6 +952,7 @@ function calculateLotNew() {
 </script>
 </body>
 </html>
+
 
 
 
