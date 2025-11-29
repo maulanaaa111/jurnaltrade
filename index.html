@@ -433,7 +433,7 @@ function calculateLotNew() {
 
         slValue = sl * pipSize;
     } else {
-        slValue = sl * 10;
+        slValue = sl * 0.1;
     }
 
     const lot = riskAmount / (slValue * contract);
@@ -949,6 +949,7 @@ function openLotCalculator() {
 </script>
 </body>
 </html>
+
 
 
 
