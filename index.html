@@ -367,42 +367,106 @@
   /* =========================
    LOT CALCULATOR - FIXED
    ========================= */
-const PAIR_VALUE = {
-    // Forex mayor (per 1 pip / 1 lot)
-    "EURUSD":   { pip: 10,  point: 1 },
-    "GBPUSD":   { pip: 10,  point: 1 },
-    "AUDUSD":   { pip: 10,  point: 1 },
-    "NZDUSD":   { pip: 10,  point: 1 },
+/* ================================
+   PAIR SPECIFICATION
+   ================================ */
+const PAIR_SPEC = {
+    "EURUSD": { type: "forex", pipValue: 10, pipSize: 0.0001 },
+    "GBPUSD": { type: "forex", pipValue: 10, pipSize: 0.0001 },
+    "USDJPY": { type: "forexJPY", pipValue: 9.3, pipSize: 0.01 },
 
-    // Forex vs Yen (JPY pairs)
-    // 1 pip = 0.01 → pip value tetap $10
-    "USDJPY":   { pip: 10,  point: 1 },
-    "GBPJPY":   { pip: 10,  point: 1 },
-    "EURJPY":   { pip: 10,  point: 1 },
+    "XAUUSD": { type: "gold", pipValue: 10, pipSize: 0.10 },
 
-    // XAU/USD (Emas)
-    // 1 pip = 0.1 → pip value $10, bukan 1
-    // FIX & AKURAT
-    "XAUUSD":   { pip: 10, point: 1 },
+    "US30": { type: "index", pipValue: 1, pointSize: 1 },
+    "US100": { type: "index", pipValue: 1, pointSize: 1 },
+    "US500": { type: "index", pipValue: 1, pointSize: 1 },
 
-    // Indeks (standar CFD)
-    "US30":     { pip: 1, point: 1 },
-    "US100":    { pip: 1, point: 1 },
-    "US500":    { pip: 1, point: 1 },
+    "BTCUSD": { type: "crypto", pipValue: 1, pointSize: 1 },
+    "ETHUSD": { type: "crypto", pipValue: 1, pointSize: 1 },
 
-    // Minyak (Oil)
-    // 1 pip = $1 → tapi broker pakai 0.01 → pip value = $10
-    "USOIL":    { pip: 10, point: 1 },
-
-    // Crypto (per $1 move)
-    // BTC 1$ move = $1 per lot
-    "BTCUSD":   { pip: 1, point: 0.1 },
-
-    // ETH sama kaya BTC
-    "ETHUSD":   { pip: 1, point: 0.1 }
+    "USOIL": { type: "oil", pipValue: 10, pipSize: 0.01 }
 };
 
 
+/* ================================
+   POPULATE PAIR LIST
+   ================================ */
+function populatePairsNew() {
+    const select = document.getElementById("lc-pair");
+    if (!select) return;
+
+    select.innerHTML = "";
+
+    Object.keys(PAIR_SPEC).forEach(pair => {
+        const opt = document.createElement("option");
+        opt.value = pair;
+        opt.textContent = pair;
+        select.appendChild(opt);
+    });
+}
+
+
+/* ================================
+   LOT CALCULATOR ENGINE
+   ================================ */
+function calculateLotNew() {
+    const balance = parseFloat(document.getElementById("lc-balance")?.value) || 0;
+    const riskPct = parseFloat(document.getElementById("lc-risk")?.value) || 0;
+    const slInput = parseFloat(document.getElementById("lc-sl")?.value) || 0;
+    const pair = document.getElementById("lc-pair")?.value;
+    const unit = document.getElementById("lc-unit")?.value;
+
+    const resultEl = document.getElementById("lc-result");
+
+    if (!pair || slInput <= 0 || balance <= 0 || riskPct <= 0) {
+        resultEl.textContent = "0.00";
+        return;
+    }
+
+    const spec = PAIR_SPEC[pair];
+    if (!spec) {
+        resultEl.textContent = "0.00";
+        return;
+    }
+
+    let stopValue; // pergerakan harga sebenarnya
+    let valuePerMove; // nilai uang per satuan gerak
+
+    // ====================================
+    // FOREX MAJOR / FOREX JPY / GOLD
+    // ====================================
+    if (spec.type === "forex" || spec.type === "forexJPY" || spec.type === "gold") {
+        if (unit === "pips") {
+            stopValue = slInput * spec.pipSize;
+        } else {
+            stopValue = slInput; // points = harga langsung
+        }
+
+        valuePerMove = spec.pipValue;
+    }
+
+    // ====================================
+    // INDEX / CRYPTO / OIL pakai points only
+    // ====================================
+    else if (spec.type === "index" || spec.type === "crypto" || spec.type === "oil") {
+        stopValue = slInput * (spec.pointSize || 1);
+        valuePerMove = spec.pipValue;
+    }
+
+    const riskAmount = balance * (riskPct / 100);
+
+    const lot = riskAmount / (stopValue * valuePerMove);
+
+    const accountType = journals.allJournals[currentJournalId].type;
+    const finalLot = (accountType === "cent") ? lot * 100 : lot;
+
+    resultEl.textContent = finalLot.toFixed(2);
+}
+
+
+/* ================================
+   OPEN MODAL
+   ================================ */
 function openLotCalculator() {
     const accountType = journals.allJournals[currentJournalId].type;
 
@@ -413,37 +477,38 @@ function openLotCalculator() {
     }, startingEquity);
 
     const modal = `
-    <h2 class="text-xl font-bold text-white mb-4">Kalkulator Lot</h2>
+        <h2 class="text-xl font-bold text-white mb-4">Kalkulator Lot</h2>
 
-    <label class="block text-sm text-gray-300 mt-4">Saldo</label>
-    <input id="lc-balance" type="number" value="${currentEquity.toFixed(2)}"
-        class="hud-input w-full" oninput="calculateLotNew()">
-
-    <label class="block text-sm text-gray-300 mt-4">Risk (%)</label>
-    <input id="lc-risk" type="number" value="1"
-        class="hud-input w-full" oninput="calculateLotNew()">
-
-    <label class="block text-sm text-gray-300 mt-4">Pair</label>
-    <select id="lc-pair" class="hud-input w-full" onchange="calculateLotNew()"></select>
-
-    <label class="block text-sm text-gray-300 mt-4">Stop Loss</label>
-    <div class="flex gap-2">
-        <input id="lc-sl" type="number" placeholder="Contoh: 20"
+        <label class="block text-sm text-gray-300 mt-4">Saldo</label>
+        <input id="lc-balance" type="number" value="${currentEquity.toFixed(2)}"
             class="hud-input w-full" oninput="calculateLotNew()">
-        <select id="lc-unit" class="hud-input" onchange="calculateLotNew()">
-            <option value="pips">Pips</option>
-            <option value="points">Points</option>
-        </select>
-    </div>
 
-    <div class="mt-6 p-4 bg-black/20 rounded border border-gray-700 text-center">
-        <p class="text-sm">Ukuran Lot</p>
-        <p id="lc-result" class="text-3xl font-bold text-[var(--accent-cyan)]">0.00</p>
-    </div>
+        <label class="block text-sm text-gray-300 mt-4">Risk (%)</label>
+        <input id="lc-risk" type="number" value="1"
+            class="hud-input w-full" oninput="calculateLotNew()">
 
-    <div class="text-right mt-4">
-        <button onclick="closeModal()" class="px-4 py-2 bg-[var(--accent-cyan)] rounded text-black">Tutup</button>
-    </div>
+        <label class="block text-sm text-gray-300 mt-4">Pair</label>
+        <select id="lc-pair" class="hud-input w-full" onchange="calculateLotNew()"></select>
+
+        <label class="block text-sm text-gray-300 mt-4">Stop Loss</label>
+        <div class="flex gap-2">
+            <input id="lc-sl" type="number" placeholder="Contoh: 20"
+                class="hud-input w-full" oninput="calculateLotNew()">
+
+            <select id="lc-unit" class="hud-input" onchange="calculateLotNew()">
+                <option value="pips">Pips</option>
+                <option value="points">Points</option>
+            </select>
+        </div>
+
+        <div class="mt-6 p-4 bg-black/20 rounded border border-gray-700 text-center">
+            <p class="text-sm">Ukuran Lot</p>
+            <p id="lc-result" class="text-3xl font-bold text-[var(--accent-cyan)]">0.00</p>
+        </div>
+
+        <div class="text-right mt-4">
+            <button onclick="closeModal()" class="px-4 py-2 bg-[var(--accent-cyan)] rounded text-black">Tutup</button>
+        </div>
     `;
 
     showModal(modal);
@@ -452,54 +517,6 @@ function openLotCalculator() {
         populatePairsNew();
         calculateLotNew();
     }, 30);
-}
-
-function populatePairsNew() {
-    const select = document.getElementById("lc-pair");
-    if (!select) return;
-
-    select.innerHTML = "";
-
-    Object.keys(PAIR_VALUE).forEach(pair => {
-        const opt = document.createElement("option");
-        opt.value = pair;
-        opt.textContent = pair;
-        select.appendChild(opt);
-    });
-}
-
-
-
-function calculateLotNew() {
-    const balance = parseFloat(document.getElementById("lc-balance")?.value) || 0;
-    const riskPct = parseFloat(document.getElementById("lc-risk")?.value) || 0;
-    const slDistance = parseFloat(document.getElementById("lc-sl")?.value) || 0;
-
-    const pair = document.getElementById("lc-pair")?.value;
-    const unit = document.getElementById("lc-unit")?.value;
-    const resultEl = document.getElementById("lc-result");
-
-    if (!resultEl || !pair || balance <= 0 || riskPct <= 0 || slDistance <= 0) {
-        resultEl.textContent = "0.00";
-        return;
-    }
-
-    const pairData = PAIR_VALUE[pair];
-    if (!pairData) {
-        resultEl.textContent = "0.00";
-        return;
-    }
-
-    // --- bagian penting disini ---
-    const perMove = unit === "pips" ? pairData.pip : pairData.point;
-    // ------------------------------
-
-    const riskAmount = balance * (riskPct / 100);
-    const totalRiskPerLot = slDistance * perMove;
-
-    const lot = riskAmount / totalRiskPerLot;
-
-    resultEl.textContent = lot.toFixed(2);
 }
 
 
@@ -952,6 +969,7 @@ function calculateLotNew() {
 </script>
 </body>
 </html>
+
 
 
 
