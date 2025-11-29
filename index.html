@@ -368,16 +368,31 @@
    LOT CALCULATOR - FIXED
    ========================= */
 const PAIR_VALUE = {
-    "EUR/USD": 10000,
-    "GBP/USD": 10000,
-    "USD/JPY": 635,
-    "XAU/USD": 100,
-    "US30": 1,
-    "US100": 1,
-    "US500": 1,
-    "BTC/USD": 1,
-    "ETH/USD": 1,
-    "USOIL": 1000
+    // Forex Major
+    "EURUSD": { pip: 10, point: 1 },
+    "GBPUSD": { pip: 10, point: 1 },
+    "AUDUSD": { pip: 10, point: 1 },
+    "NZDUSD": { pip: 10, point: 1 },
+
+    // Forex JPY
+    "USDJPY": { pip: 9.2, point: 0.92 },
+    "GBPJPY": { pip: 9.2, point: 0.92 },
+    "EURJPY": { pip: 9.2, point: 0.92 },
+
+    // Gold
+    "XAUUSD": { pip: 1, point: 0.10 },
+
+    // Index
+    "US500": { pip: 1, point: 1 },
+    "US30": { pip: 1, point: 1 },
+    "NAS100": { pip: 1, point: 1 },
+
+    // Oil
+    "USOIL": { pip: 10, point: 1 }, // WTI → $10 per 1 pip (0.01)
+
+    // Crypto
+    "BTCUSD": { pip: 1, point: 0.1 }, 
+    "ETHUSD": { pip: 1, point: 0.1 }
 };
 
 
@@ -453,6 +468,7 @@ function calculateLotNew() {
     const balance = parseFloat(document.getElementById("lc-balance")?.value) || 0;
     const riskPct = parseFloat(document.getElementById("lc-risk")?.value) || 0;
     const slDistance = parseFloat(document.getElementById("lc-sl")?.value) || 0;
+
     const pair = document.getElementById("lc-pair")?.value;
     const unit = document.getElementById("lc-unit")?.value;
     const resultEl = document.getElementById("lc-result");
@@ -462,33 +478,23 @@ function calculateLotNew() {
         return;
     }
 
-    const pipValue = PAIR_VALUE[pair];
-    if (!pipValue) {
+    const pv = PAIR_VALUE[pair];
+    if (!pv) {
         resultEl.textContent = "0.00";
         return;
     }
 
-    // Tentukan besar pips / points sesuai pair
-    let multiplier;
-
-    if (unit === "pips") {
-        if (pair.includes("JPY")) multiplier = 0.01;
-        else if (pair === "XAU/USD") multiplier = 0.10;
-        else multiplier = 0.0001;
-    } else { // points
-        if (pair.includes("JPY")) multiplier = 0.001;
-        else if (pair === "XAU/USD") multiplier = 0.01;
-        else multiplier = 0.00001;
-    }
+    // pilih pipValue atau pointValue
+    const pipValue = unit === "pips" ? pv.pip : pv.point;
 
     const riskAmount = balance * (riskPct / 100);
-    const valuePerSL = slDistance * multiplier * pipValue;
 
-    const lot = riskAmount / valuePerSL;
+    const dollarLoss = slDistance * pipValue;
+
+    const lot = riskAmount / dollarLoss;
 
     resultEl.textContent = lot.toFixed(2);
 }
-
 
 
 
@@ -941,6 +947,7 @@ function calculateLotNew() {
 </script>
 </body>
 </html>
+
 
 
 
