@@ -391,8 +391,8 @@ const PAIR_VALUE = {
     "USOIL": { pip: 10, point: 1 }, // WTI → $10 per 1 pip (0.01)
 
     // Crypto
-    "BTCUSD": { pip: 1, point: 0.1 }, 
-    "ETHUSD": { pip: 1, point: 0.1 }
+      "BTCUSD":   { pip: 1, point: 0.1 },
+    "ETHUSD":   { pip: 1, point: 0.1 }
 };
 
 
@@ -473,29 +473,28 @@ function calculateLotNew() {
     const unit = document.getElementById("lc-unit")?.value;
     const resultEl = document.getElementById("lc-result");
 
-    if (!pair || balance <= 0 || riskPct <= 0 || slDistance <= 0) {
+    if (!resultEl || !pair || balance <= 0 || riskPct <= 0 || slDistance <= 0) {
         resultEl.textContent = "0.00";
         return;
     }
 
-    const pv = PAIR_VALUE[pair];
-    if (!pv) {
+    const pairData = PAIR_VALUE[pair];
+    if (!pairData) {
         resultEl.textContent = "0.00";
         return;
     }
 
-    // pilih pipValue atau pointValue
-    const pipValue = unit === "pips" ? pv.pip : pv.point;
+    // --- bagian penting disini ---
+    const perMove = unit === "pips" ? pairData.pip : pairData.point;
+    // ------------------------------
 
     const riskAmount = balance * (riskPct / 100);
+    const totalRiskPerLot = slDistance * perMove;
 
-    const dollarLoss = slDistance * pipValue;
-
-    const lot = riskAmount / dollarLoss;
+    const lot = riskAmount / totalRiskPerLot;
 
     resultEl.textContent = lot.toFixed(2);
 }
-
 
 
 
@@ -947,6 +946,7 @@ function calculateLotNew() {
 </script>
 </body>
 </html>
+
 
 
 
