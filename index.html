@@ -503,57 +503,58 @@ function openLotCalculator() {
 
     // --- DATA MANAGEMENT ---
     function loadData() {
-    const journalsMeta = JSON.parse(localStorage.getItem('tradingJournals')) || null;
+    journals = JSON.parse(localStorage.getItem("tradingJournals")) || null;
 
-    if (journalsMeta && Object.keys(journalsMeta.allJournals).length > 0) {
-        journals = journalsMeta;
-        currentJournalId = journals.currentJournalId;
-    } else {
-        const firstJournalId = `j_${Date.now()}`;
+    if (!journals) {
+        // buat jurnal pertama
+        const id = `j_${Date.now()}`;
         journals = {
-            allJournals: { [firstJournalId]: { name: "Jurnal Utama", type: 'standard' } },
-            currentJournalId: firstJournalId
+            allJournals: { [id]: { name: "Jurnal Utama", type: "standard" }},
+            currentJournalId: id
         };
-        localStorage.setItem('tradingJournals', JSON.stringify(journals));
-        localStorage.setItem(`journal_${firstJournalId}`, JSON.stringify({ startingEquity: 0, trades: [] }));
-        currentJournalId = firstJournalId;
+        localStorage.setItem("tradingJournals", JSON.stringify(journals));
+        localStorage.setItem(`journal_${id}`, JSON.stringify({ startingEquity: 0, trades: [] }));
     }
 
-    // ❗ FIX: selalu load data sesuai jurnal yang aktif
-    const stored = JSON.parse(localStorage.getItem(`journal_${currentJournalId}`));
-    startingEquity = stored?.startingEquity || 0;
-    trades = stored?.trades || [];
-    trades.sort((a, b) => a.timestamp - b.timestamp);
+    currentJournalId = journals.currentJournalId;
+
+    // load hanya jurnal aktif
+    const data = JSON.parse(localStorage.getItem(`journal_${currentJournalId}`)) || { startingEquity: 0, trades: [] };
+    startingEquity = data.startingEquity;
+    trades = data.trades;
 }
+
     function saveData() {
-    // ❗ FIX: simpan state HANYA untuk jurnal aktif
+    // simpan hanya data jurnal aktif
     localStorage.setItem(`journal_${currentJournalId}`, JSON.stringify({
         startingEquity,
         trades
     }));
-    localStorage.setItem('tradingJournals', JSON.stringify(journals));
+
+    // simpan metadata kecil
+    localStorage.setItem("tradingJournals", JSON.stringify(journals));
 }
 
+
     // --- JOURNAL MANAGEMENT ---
-    function switchJournal(journalId) {
-    if (journalId === currentJournalId) return;
+    function switchJournal(id) {
+    if (id === currentJournalId) return;
 
-    // Set jurnal baru
-    currentJournalId = journalId;
-    journals.currentJournalId = journalId;
-    localStorage.setItem('tradingJournals', JSON.stringify(journals));
+    currentJournalId = id;
+    journals.currentJournalId = id;
 
-    // ❗ FIX: load ulang data jurnal baru, bukan memakai data lama
-    const stored = JSON.parse(localStorage.getItem(`journal_${journalId}`)) || { startingEquity: 0, trades: [] };
-    startingEquity = stored.startingEquity;
-    trades = stored.trades;
-    trades.sort((a, b) => a.timestamp - b.timestamp);
+    localStorage.setItem("tradingJournals", JSON.stringify(journals));
 
-    // Refresh UI
+    const data = JSON.parse(localStorage.getItem(`journal_${id}`)) || { startingEquity: 0, trades: [] };
+
+    startingEquity = data.startingEquity;
+    trades = data.trades;
+
     renderJournalSwitcher();
     renderTradeLog();
     updateDashboard();
 }
+
     function createJournal(name, type) {
     if (!name.trim()) return;
     const newId = `j_${Date.now()}`;
@@ -949,6 +950,7 @@ function openLotCalculator() {
 </script>
 </body>
 </html>
+
 
 
 
