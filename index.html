@@ -555,42 +555,61 @@ function openLotCalculator() {
     updateDashboard();
 }
 
-    function createJournal(name, type) {
+   function createJournal(name, type) {
     if (!name.trim()) return;
-    const newId = `j_${Date.now()}`;
-    journals.allJournals[newId] = { name: name.trim(), type: type };
 
-    // ❗ FIX: pastikan jurnal baru benar-benar memiliki state baru
-    localStorage.setItem(`journal_${newId}`, JSON.stringify({
+    const id = `j_${Date.now()}`;
+
+    journals.allJournals[id] = { name: name.trim(), type: type };
+
+    localStorage.setItem("tradingJournals", JSON.stringify(journals));
+
+    localStorage.setItem(`journal_${id}`, JSON.stringify({
         startingEquity: 0,
         trades: []
     }));
 
-    switchJournal(newId);
+    switchJournal(id);
     closeModal();
 }
+
     function renameJournal(journalId, newName) {
-        if (!newName.trim()) return;
-        journals.allJournals[journalId].name = newName.trim();
-        saveData();
-        renderJournalSwitcher();
-        renderManageJournalModal();
-    }
+    if (!newName.trim()) return;
+
+    journals.allJournals[journalId].name = newName.trim();
+
+    // Simpan metadata saja
+    localStorage.setItem("tradingJournals", JSON.stringify(journals));
+
+    renderJournalSwitcher();
+    renderManageJournalModal();
+}
+
     function deleteJournal(journalId) {
-        if (Object.keys(journals.allJournals).length <= 1) return;
-        delete journals.allJournals[journalId];
-        localStorage.removeItem(`journal_${journalId}`);
-        if (currentJournalId === journalId) {
-            currentJournalId = Object.keys(journals.allJournals)[0];
-            journals.currentJournalId = currentJournalId;
-        }
-        saveData();
-        loadData();
-        renderJournalSwitcher();
-        updateDashboard();
-        renderTradeLog();
-        renderManageJournalModal();
+    if (Object.keys(journals.allJournals).length <= 1) return;
+
+    delete journals.allJournals[journalId];
+    localStorage.removeItem(`journal_${journalId}`);
+
+    if (currentJournalId === journalId) {
+        currentJournalId = Object.keys(journals.allJournals)[0];
+        journals.currentJournalId = currentJournalId;
     }
+
+    // simpan metadata dulu
+    localStorage.setItem("tradingJournals", JSON.stringify(journals));
+
+    // baru load ulang
+    const data = JSON.parse(localStorage.getItem(`journal_${currentJournalId}`)) || { startingEquity: 0, trades: [] };
+    startingEquity = data.startingEquity;
+    trades = data.trades;
+
+    renderJournalSwitcher();
+    updateDashboard();
+    renderTradeLog();
+    renderManageJournalModal();
+}
+
     
     // --- UI & RENDERING ---
     function switchView(viewName) {
@@ -950,6 +969,7 @@ function openLotCalculator() {
 </script>
 </body>
 </html>
+
 
 
 
